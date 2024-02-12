@@ -6,7 +6,7 @@ dotenv.config();
 const mongoUrl: any = process.env.mongoUrl;
 const client = new MongoClient(mongoUrl)
 
-async function queryEmbeddings(query: string) {
+async function queryLogs(query: string) {
   try {
     await client.connect()
     const db = client.db('genai')
@@ -35,13 +35,17 @@ async function queryEmbeddings(query: string) {
         },
       ])
       .toArray()
-
-    const summary = await getOpenAiSummary(results)
-    return summary
+    return results
   } finally {
     console.log('Closing connection.')
     await client.close()
   }
 }
 
-export { queryEmbeddings }
+async function generateResult(query:string) {
+  const results = await queryLogs(query)
+  const summary = await getOpenAiSummary(results)
+  return summary
+}
+
+export { queryLogs, generateResult }
