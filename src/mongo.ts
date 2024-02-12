@@ -1,9 +1,10 @@
 import { AuditLogs } from './model/auditLogs'
 import { generateEmbeddings, getOpenAiSummary } from './openai'
 import { MongoClient } from 'mongodb'
-const client = new MongoClient(
-  'mongodb+srv://admin:admin@cluster0.ls5ezu2.mongodb.net/',
-)
+import dotenv from 'dotenv';
+dotenv.config();
+const mongoUrl: any = process.env.mongoUrl;
+const client = new MongoClient(mongoUrl)
 
 async function queryEmbeddings(query: string) {
   try {
