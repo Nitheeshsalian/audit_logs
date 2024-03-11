@@ -19,8 +19,8 @@ async function generateEmbeddings(text: string) {
 async function getOpenAiSummary(results: any) {
   const notes = results.map(
     (item: { additional_details: { Notes: string } }) =>
-      item.additional_details && item.additional_details.Notes
-        ? item.additional_details.Notes
+      item.additional_details && item.additional_details
+        ? item.additional_details
         : '',
   )
   const toSummary = notes.filter(
@@ -28,7 +28,7 @@ async function getOpenAiSummary(results: any) {
   )
 
   const completion = await openai.chat.completions.create({
-    messages: [{ role: 'system', content: 'Summarise ' + toSummary[0] }],
+    messages: [{ role: 'system', content: 'Break sentance and summarise' + toSummary }],
     model: 'gpt-3.5-turbo-1106',
   })
 

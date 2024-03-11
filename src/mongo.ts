@@ -10,14 +10,14 @@ async function queryLogs(query: string) {
   try {
     await client.connect()
     const db = client.db('genai')
-    const collection = db.collection('audit_logs')
+    const collection = db.collection('audit_logs_v2')
     const vectorizedQuery = await generateEmbeddings(query)
 
     const results = await collection
       .aggregate([
         {
           $vectorSearch: {
-            index: 'vector_index_notes',
+            index: 'vector_index',
             queryVector: vectorizedQuery,
             path: 'notes_embedding',
             limit: 4,
