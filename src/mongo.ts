@@ -1,5 +1,5 @@
 import { AuditLogs } from './model/auditLogs'
-import { generateEmbeddings, getOpenAiSummary } from './openai'
+import { generateEmbeddings, getOpenAiSummary, getOpenAiSummaryv3 } from './openai'
 import { MongoClient } from 'mongodb'
 import dotenv from 'dotenv';
 dotenv.config();
@@ -48,4 +48,47 @@ async function generateResult(query:string) {
   return summary
 }
 
-export { queryLogs, generateResult }
+async function queryLogsv3(query: string) {
+  try {
+    await client.connect()
+    const db = client.db('genai')
+    const collection = db.collection('audit_logs_v3')
+    const vectorizedQuery = await generateEmbeddings(query)
+
+    const results = await collection
+      .aggregate([
+        {
+          $vectorSearch: {
+            index: 'vector_index',
+            queryVector: vectorizedQuery,
+            path: 'notes_embedding',
+            limit: 10,
+            numCandidates: 100,
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            user: 1,
+            template_id: 1,
+            audit_category: 1,
+            additional_details: 1,
+            attributes_map: 1,
+          },
+        },
+      ])
+      .toArray()
+    return results
+  } finally {
+    console.log('Closing connection.')
+    await client.close()
+  }
+}
+
+async function generateResultv3(query:string) {
+  const results = await queryLogsv3(query)
+  const summary = await getOpenAiSummaryv3(results)
+  return summary
+}
+
+export { queryLogs, generateResult, generateResultv3, queryLogsv3 }
