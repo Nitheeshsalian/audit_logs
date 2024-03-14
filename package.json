@@ -21,6 +21,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.4.2",
     "express-joi-validation": "^5.0.1",
     "joi": "^17.12.1",
