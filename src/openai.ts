@@ -47,11 +47,11 @@ async function getOpenAiSummaryv3(results: any) {
   )
 
   const completion = await openai.chat.completions.create({
-    messages: [{ role: 'system', content: 'Break sentance and summarise into bullet points with numbers also remove order number' + toSummary }],
+    messages: [{ role: 'system', content: 'Give a summarization in bulet points. If its a positive point prepend a positive mark emoji to bullet point else if its a negetive point prepend a negetive cross mark emoji with following' + toSummary }],
     model: 'gpt-3.5-turbo-1106',
   })
 
-  return completion.choices[0]
+  return toSummary.length > 0  ? completion.choices[0] : 'No matching document'
 }
 
 export { generateEmbeddings, getOpenAiSummary, getOpenAiSummaryv3 }

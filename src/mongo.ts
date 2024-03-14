@@ -1,6 +1,6 @@
 import { AuditLogs } from './model/auditLogs'
 import { generateEmbeddings, getOpenAiSummary, getOpenAiSummaryv3 } from './openai'
-import { MongoClient } from 'mongodb'
+import { Document, MongoClient } from 'mongodb'
 import dotenv from 'dotenv';
 dotenv.config();
 const mongoUrl: any = process.env.mongoUrl;
@@ -63,7 +63,7 @@ async function queryLogsv3(query: string) {
             queryVector: vectorizedQuery,
             path: 'notes_embedding',
             limit: 10,
-            numCandidates: 100,
+            numCandidates: 100
           },
         },
         {
@@ -74,11 +74,25 @@ async function queryLogsv3(query: string) {
             audit_category: 1,
             additional_details: 1,
             attributes_map: 1,
-          },
-        },
+            time: 1,
+            score: {
+              '$meta': 'vectorSearchScore'
+            }
+          }
+        }
       ])
       .toArray()
-    return results
+    const orderNumber = query.replace(/[^0-9]/g, '')
+    if(orderNumber != ''){
+      const numbersArray: Document[] = []
+      results.map(item=> {
+        if(item.additional_details.Notes.indexOf(orderNumber) > 0)
+        numbersArray.push(item)
+      })
+      return numbersArray
+    } else {
+      return results
+    }
   } finally {
     console.log('Closing connection.')
     await client.close()
